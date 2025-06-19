@@ -1,6 +1,6 @@
 # 🌐 Guide des Réseaux Informatiques - Les Fondamentaux
 
-> **Guide pédagogique pour étudiants débutants (Bac+1 / DUT-BUT Informatique)**
+> **Guide pédagogique pour étudiants de 42 (basic / pas très appronfondis)**
 
 ## 📚 Table des matières
 

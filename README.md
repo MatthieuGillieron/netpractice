@@ -1,7 +1,5 @@
 # NetPractice - Guide Complet
 
-**Projet 42 : Maîtriser les fondamentaux du réseau TCP/IP**
-
 > [!IMPORTANT]
 > Certaines explications présentes dans ce document proviennent de différentes sources \
 > dont une vidéo particulièrement claire et utile que je recommande vivement \
@@ -164,6 +162,6 @@ ifconfig
 
 **💡 Conseil Final :** NetPractice est un exercice de logique réseau. Prenez le temps de comprendre chaque concept avant de passer au suivant. La maîtrise des bases vous permettra de résoudre efficacement tous les niveaux.
 
-> [!info]
+> [!TIP]
 > Si ce contenu vous a été utile... \
 > N'hésitez pas à laisser une ⭐️ étoile sur ce repo pour me soutenir !

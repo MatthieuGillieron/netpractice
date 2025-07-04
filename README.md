@@ -27,7 +27,17 @@ NetPractice est un exercice pratique qui vous permet de configurer de petits ré
 
 ## 🔧 Concepts Essentiels
 
-### 1. Adressage IP
+### 1. Définitions de Base
+
+**LAN (Local Area Network) :** Réseau local où plusieurs appareils communiquent dans une zone limitée (ex: réseau domestique).
+
+**Switch :** Appareil qui connecte plusieurs dispositifs dans un LAN et gère l'envoi des données entre eux.
+
+**Router :** Dispositif qui connecte le LAN à des réseaux externes (Internet). Il peut avoir plusieurs adresses IP pour différents réseaux.
+
+**Gateway :** Point d'entrée/sortie d'un réseau. Souvent le même appareil que le routeur mais avec une fonction différente.
+
+### 2. Adressage IP
 
 **Format IPv4 :** `XXX.XXX.XXX.XXX/XX`
 
@@ -59,7 +69,21 @@ Exemple : 192.168.1.10/24
 - Incrément : 256 - 192 = 64
 - Sous-réseaux : 0, 64, 128, 192
 
+### 4. Adresses Réservées
+
+**Important :** Dans chaque réseau, 2 adresses sont réservées :
+- **Adresse réseau** : Première IP (ex: 192.168.1.0)
+- **Adresse broadcast** : Dernière IP (ex: 192.168.1.255)
+- **Plage utilisable** : De .1 à .254 dans l'exemple ci-dessus
+
 ## 🛠️ Méthodologie de Résolution
+
+### Stratégie "Clean Slate"
+1. **Effacer tout** : Supprimez toutes les configurations dans les zones non grisées
+2. **Repartir à zéro** : Commencez avec une vue propre
+3. **Travailler à rebours** : Utilisez les valeurs par défaut données pour remplir le reste
+4. **Un objectif à la fois** : Si plusieurs goals, les traiter séparément
+5. **Vérifier fréquemment** : Tester après chaque modification
 
 ### Étape 1 : Analyser la Topologie
 1. Identifier tous les appareils (PC, routeurs, switches)
@@ -92,6 +116,21 @@ Exemple : 192.168.1.10/24
 - Routes manquantes ou incorrectes
 - Utilisation d'adresses réseau ou broadcast
 
+## 📊 Tableau de Référence CIDR
+
+### Tableau Simplifié pour NetPractice
+
+| CIDR | Masque (4e octet) | Incrément | Réseaux | Hôtes/réseau |
+|------|-------------------|-----------|---------|---------------|
+| /25  | 128               | 128       | 2       | 126          |
+| /26  | 192               | 64        | 4       | 62           |
+| /27  | 224               | 32        | 8       | 30           |
+| /28  | 240               | 16        | 16      | 14           |
+| /29  | 248               | 8         | 32      | 6            |
+| /30  | 252               | 4         | 64      | 2            |
+
+**Usage :** L'incrément vous donne directement les plages de sous-réseaux.
+
 ## 🔍 Exemples de Configuration
 
 ### Configuration Interface
@@ -103,29 +142,12 @@ Interface A1:
 
 ### Table de Routage
 ```
-Destination     | Masque          | Gateway
+Destination     | Masque          | Next Hop (Gateway)
 0.0.0.0         | 0.0.0.0         | 192.168.1.254
 192.168.2.0     | 255.255.255.0   | 10.0.0.1
 ```
 
-## 🧪 Tests de Validation
-
-### Vérifications Essentielles
-1. **Connectivité locale :** Ping entre machines du même réseau
-2. **Routage :** Communication entre réseaux différents
-3. **Cohérence :** Pas de conflits d'adressage
-
-### Commandes de Test
-```bash
-# Test de connectivité
-ping [adresse_ip]
-
-# Affichage de la table de routage
-route -n
-
-# Configuration réseau
-ifconfig
-```
+**Note :** "default" dans destination = route par défaut (0.0.0.0/0)
 
 ## 📚 Ressources Utiles
 
@@ -141,10 +163,18 @@ ifconfig
 
 ## 🎯 Stratégie de Réussite
 
-1. **Comprendre avant de configurer** : Analysez la topologie complète
-2. **Procéder étape par étape** : Configurez un réseau à la fois
-3. **Tester régulièrement** : Validez chaque configuration
-4. **Documenter vos choix** : Notez vos décisions d'adressage
+### Approche Méthodique
+1. **"Clean Slate"** : Effacez tout et repartez proprement
+2. **Travailler à rebours** : Utilisez les valeurs données comme point de départ
+3. **Un goal à la fois** : Ne pas se disperser sur plusieurs objectifs
+4. **Vérifications fréquentes** : Tester après chaque modification
+5. **Utiliser le tableau CIDR** : Référence rapide pour les calculs
+
+### Conseils Pratiques
+- **Même masque = même réseau** : Tous les appareils d'un réseau doivent avoir le même masque
+- **Next Hop** : Dans les tables de routage, c'est l'adresse du prochain routeur
+- **Point-to-point** : Utilisez /30 pour les liaisons entre routeurs
+- **Plages privées** : Respectez 10.x.x.x, 172.16-31.x.x, 192.168.x.x
 
 ## 🔧 Outils de Débogage
 

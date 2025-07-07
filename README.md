@@ -1,197 +1,361 @@
-# NetPractice - Guide Complet
+# NetPractice - Guide Complet de Configuration Réseau
 
 > [!IMPORTANT]
-> Certaines explications présentes dans ce document proviennent de différentes sources \
-> dont une vidéo particulièrement claire et utile que je recommande vivement \
-> Lien vers la vidéo https://youtu.be/HQUw0CfQWAM?feature=shared
+> Ce guide s'inspire de différentes sources \
+> dont une vidéo particulièrement claire : https://youtu.be/HQUw0CfQWAM
 
-## 📋 Objectif du Projet
+## 🎯 Objectif du Projet
 
-NetPractice est un exercice pratique qui vous permet de configurer de petits réseaux et de résoudre des problèmes de connectivité. Vous devrez comprendre et appliquer les concepts de :
-- Adressage IP et sous-réseaux
-- Routage et tables de routage
-- Configuration réseau
+NetPractice est un exercice pratique de configuration réseau où vous devez :
+- Configurer des adresses IP et masques de sous-réseau
+- Établir la connectivité entre différents appareils
+- Comprendre le routage et les tables de routage
+- Résoudre des problèmes de communication réseau
 
-## 🎯 Compétences Développées
+## 📚 Table des Matières
 
-- Configuration d'adresses IP et masques de sous-réseau
-- Compréhension du routage réseau
-- Résolution de conflits d'adressage
-- Analyse de topologies réseau
+- [Concepts Fondamentaux](#-concepts-fondamentaux)
+- [Adressage IP](#-adressage-ip)
+- [Masques de Sous-réseau](#-masques-de-sous-réseau)
+- [Équipements Réseau](#️-équipements-réseau)
+- [Tables de Routage](#-tables-de-routage)
+- [Méthodologie](#️-méthodologie)
+- [Outils de Référence](#-outils-de-référence)
+- [Exemples Pratiques](#-exemples-pratiques)
 
-## 📊 Architecture Réseau Type
+## 🔧 Concepts Fondamentaux
 
-![Network Diagram](chart2.png)
+### Définitions Essentielles
 
-*Diagramme représentant une topologie réseau typique du projet*
+**LAN (Local Area Network)**
+- Réseau local où plusieurs appareils communiquent dans une zone limitée
+- Exemple : réseau domestique, réseau d'entreprise
 
-## 🔧 Concepts Essentiels
+**IP (Internet Protocol)**
+- Adresse unique identifiant un appareil sur le réseau
+- Format IPv4 : `XXX.XXX.XXX.XXX` (4 octets de 0 à 255)
+- Permet aux appareils de communiquer entre eux
 
-### 1. Définitions de Base
+**Subnet (Sous-réseau)**
+- Division logique d'un réseau plus large
+- Défini par une adresse réseau + masque de sous-réseau
+- Détermine quels appareils peuvent communiquer directement
 
-**LAN (Local Area Network) :** Réseau local où plusieurs appareils communiquent dans une zone limitée (ex: réseau domestique).
+## 🌐 Adressage IP
 
-**Switch :** Appareil qui connecte plusieurs dispositifs dans un LAN et gère l'envoi des données entre eux.
-
-**Router :** Dispositif qui connecte le LAN à des réseaux externes (Internet). Il peut avoir plusieurs adresses IP pour différents réseaux.
-
-**Gateway :** Point d'entrée/sortie d'un réseau. Souvent le même appareil que le routeur mais avec une fonction différente.
-
-### 2. Adressage IP
-
-**Format IPv4 :** `XXX.XXX.XXX.XXX/XX`
-
+### Format IPv4
 ```
-Exemple : 192.168.1.10/24
+192.168.1.10/24
 ├─ Adresse IP : 192.168.1.10
-└─ Masque : /24 (255.255.255.0)
+└─ Masque CIDR : /24 (255.255.255.0)
 ```
 
-### 2. Masques de Sous-réseau (CIDR)
+### Plages d'Adresses Privées
+| Plage | Notation CIDR | Usage |
+|-------|---------------|-------|
+| `10.0.0.0 - 10.255.255.255` | `10.0.0.0/8` | Grandes entreprises |
+| `172.16.0.0 - 172.31.255.255` | `172.16.0.0/12` | Réseaux moyens |
+| `192.168.0.0 - 192.168.255.255` | `192.168.0.0/16` | Réseaux domestiques |
 
-| CIDR | Masque          | Hôtes | Utilisation |
-|------|-----------------|-------|-------------|
-| /24  | 255.255.255.0   | 254   | Réseau standard |
-| /25  | 255.255.255.128 | 126   | Division en 2 |
-| /26  | 255.255.255.192 | 62    | Division en 4 |
-| /27  | 255.255.255.224 | 30    | Division en 8 |
-| /28  | 255.255.255.240 | 14    | Petit réseau |
-| /30  | 255.255.255.252 | 2     | Liaison point-à-point |
+### Adresses Réservées
+Dans chaque sous-réseau :
+- **Adresse réseau** : Première IP (ex: `192.168.1.0`)
+- **Adresse broadcast** : Dernière IP (ex: `192.168.1.255`)
+- **Plage utilisable** : Entre les deux (ex: `192.168.1.1` à `192.168.1.254`)
 
-### 3. Calcul de Sous-réseau
+## 🎭 Masques de Sous-réseau
 
-**Méthode rapide :**
+### Tableau de Référence CIDR
+
+| CIDR | Masque Décimal | Hôtes Utilisables | Incrément | Usage Typique |
+|------|----------------|-------------------|-----------|---------------|
+| /30 | 255.255.255.252 | 2 | 4 | Liaison point-à-point |
+| /29 | 255.255.255.248 | 6 | 8 | Très petit réseau |
+| /28 | 255.255.255.240 | 14 | 16 | Petit bureau |
+| /27 | 255.255.255.224 | 30 | 32 | Bureau moyen |
+| /26 | 255.255.255.192 | 62 | 64 | Grand bureau |
+| /25 | 255.255.255.128 | 126 | 128 | Division en 2 |
+| /24 | 255.255.255.0 | 254 | 256 | Réseau standard |
+
+### Calcul Rapide des Sous-réseaux
 1. **Incrément = 256 - dernier octet du masque**
-2. **Multiplier par le numéro de sous-réseau**
+2. **Sous-réseaux = multiples de l'incrément**
 
-**Exemple avec /26 :**
-- Masque : 255.255.255.192
+**Exemple avec /26 (255.255.255.192) :**
 - Incrément : 256 - 192 = 64
 - Sous-réseaux : 0, 64, 128, 192
+- Plages : 0-63, 64-127, 128-191, 192-255
 
-### 4. Adresses Réservées
+## 🖥️ Équipements Réseau
 
-**Important :** Dans chaque réseau, 2 adresses sont réservées :
-- **Adresse réseau** : Première IP (ex: 192.168.1.0)
-- **Adresse broadcast** : Dernière IP (ex: 192.168.1.255)
-- **Plage utilisable** : De .1 à .254 dans l'exemple ci-dessus
+### Switch
+- **Fonction** : Connecte plusieurs appareils dans un même réseau
+- **Rôle** : Distribue les données entre les appareils du LAN
+- **Caractéristique** : Fonctionne au niveau 2 (liaison de données)
 
-## 🛠️ Méthodologie de Résolution
+### Router (Routeur)
+- **Fonction** : Connecte différents réseaux entre eux
+- **Rôle** : Achemine les données entre réseaux distincts
+- **Caractéristique** : Peut avoir plusieurs interfaces avec des IP différentes
 
-### Stratégie "Clean Slate"
-1. **Effacer tout** : Supprimez toutes les configurations dans les zones non grisées
-2. **Repartir à zéro** : Commencez avec une vue propre
-3. **Travailler à rebours** : Utilisez les valeurs par défaut données pour remplir le reste
-4. **Un objectif à la fois** : Si plusieurs goals, les traiter séparément
-5. **Vérifier fréquemment** : Tester après chaque modification
+### Gateway (Passerelle)
+- **Fonction** : Point d'entrée/sortie d'un réseau
+- **Rôle** : Souvent le même appareil que le routeur
+- **Usage** : Route par défaut pour sortir du réseau local
 
-### Étape 1 : Analyser la Topologie
-1. Identifier tous les appareils (PC, routeurs, switches)
-2. Noter les connexions existantes
-3. Repérer les adresses IP déjà configurées
+## 📋 Tables de Routage
 
-### Étape 2 : Planifier l'Adressage
-1. Déterminer les réseaux nécessaires
-2. Choisir les masques appropriés
-3. Éviter les conflits d'adresses
-
-### Étape 3 : Configuration
-1. Configurer les interfaces réseau
-2. Définir les routes statiques
-3. Tester la connectivité
-
-## 📝 Règles de Configuration
-
-### ✅ Bonnes Pratiques
-- Utiliser des adresses cohérentes dans chaque sous-réseau
-- Configurer les routes par défaut vers les gateways
-- Respecter les plages d'adresses privées :
-  - `10.0.0.0/8`
-  - `172.16.0.0/12`
-  - `192.168.0.0/16`
-
-### ❌ Erreurs Courantes
-- Adresses IP en conflit
-- Masques de sous-réseau incorrects
-- Routes manquantes ou incorrectes
-- Utilisation d'adresses réseau ou broadcast
-
-## 📊 Tableau de Référence CIDR
-
-### Tableau Simplifié pour NetPractice
-
-| CIDR | Masque (4e octet) | Incrément | Réseaux | Hôtes/réseau |
-|------|-------------------|-----------|---------|---------------|
-| /25  | 128               | 128       | 2       | 126          |
-| /26  | 192               | 64        | 4       | 62           |
-| /27  | 224               | 32        | 8       | 30           |
-| /28  | 240               | 16        | 16      | 14           |
-| /29  | 248               | 8         | 32      | 6            |
-| /30  | 252               | 4         | 64      | 2            |
-
-**Usage :** L'incrément vous donne directement les plages de sous-réseaux.
-
-## 🔍 Exemples de Configuration
-
-### Configuration Interface
+### Structure
 ```
-Interface A1:
-├─ IP : 192.168.1.1
-└─ Masque : 255.255.255.0 (/24)
-```
-
-### Table de Routage
-```
-Destination     | Masque          | Next Hop (Gateway)
-0.0.0.0         | 0.0.0.0         | 192.168.1.254
+Destination     | Masque          | Next Hop (Passerelle)
+0.0.0.0         | 0.0.0.0         | 192.168.1.1
 192.168.2.0     | 255.255.255.0   | 10.0.0.1
 ```
 
-**Note :** "default" dans destination = route par défaut (0.0.0.0/0)
+### Éléments Clés
+- **Destination** : Réseau cible (ou `default`/`0.0.0.0/0` pour route par défaut)
+- **Next Hop** : Adresse IP du prochain routeur vers la destination
+- **Interface** : Port de sortie du routeur
 
-## 📚 Ressources Utiles
+## 🛠️ Méthodologie
 
-### Calculateurs Réseau
-- Calcul de sous-réseaux en ligne
-- Convertisseurs CIDR
-- Outils de validation d'adresses IP
+### Stratégie "Clean Slate"
+1. **Effacer tout** : Supprimez toutes les configurations modifiables
+2. **Vue propre** : Commencez avec un environnement clair
+3. **Travailler à rebours** : Utilisez les valeurs données comme références
+4. **Un objectif à la fois** : Traitez chaque goal séparément
+5. **Vérifications fréquentes** : Testez après chaque modification
 
-### Documentation
-- RFC 791 (Internet Protocol)
-- RFC 950 (Internet Standard Subnetting Procedure)
-- Guide de routage TCP/IP
+### Étapes de Configuration
+1. **Analyser la topologie** : Identifier tous les équipements et connexions
+2. **Planifier l'adressage** : Choisir les plages IP et masques appropriés
+3. **Configurer les interfaces** : Assigner les adresses IP
+4. **Définir les routes** : Configurer les tables de routage
+5. **Tester la connectivité** : Vérifier que tous les goals sont atteints
 
-## 🎯 Stratégie de Réussite
+## 📊 Outils de Référence
+
+### Règles de Validation
+- **Même réseau** : Même masque de sous-réseau obligatoire
+- **Communication inter-réseaux** : Routeur nécessaire
+- **Pas de conflit** : Chaque IP unique dans son réseau
+- **Plages valides** : Respecter les adresses utilisables
+
+### Masques Binaires Valides
+```
+255 = 11111111    224 = 11100000
+254 = 11111110    192 = 11000000  
+252 = 11111100    128 = 10000000
+248 = 11111000    0   = 00000000
+240 = 11110000
+```
+**Règle** : Après un bit à 0, tous les suivants doivent être à 0
+
+## 💡 Exemples Pratiques
+
+### Configuration Basique
+```
+PC-A : 192.168.1.10/24
+PC-B : 192.168.1.20/24
+→ Communication directe possible (même réseau)
+```
+
+### Configuration avec Routeur
+```
+Réseau A : 192.168.1.0/24
+Réseau B : 192.168.2.0/24
+Routeur : 192.168.1.1 (interface A) + 192.168.2.1 (interface B)
+→ Communication via routeur
+```
+
+### Table de Routage Type
+```
+PC dans 192.168.1.0/24 :
+Destination : default
+Next Hop : 192.168.1.1 (routeur)
+```
+
+## 🚨 Erreurs Courantes
+
+### À Éviter
+- ❌ Masques différents dans le même réseau
+- ❌ Utilisation d'adresses réseau/broadcast
+- ❌ Conflits d'adresses IP
+- ❌ Routes manquantes ou incorrectes
+- ❌ Next hop dans un réseau différent
+
+### Bonnes Pratiques
+- ✅ Vérifier la cohérence des masques
+- ✅ Tester chaque modification
+
+## 🎯 Conseils de Réussite
 
 ### Approche Méthodique
-1. **"Clean Slate"** : Effacez tout et repartez proprement
-2. **Travailler à rebours** : Utilisez les valeurs données comme point de départ
-3. **Un goal à la fois** : Ne pas se disperser sur plusieurs objectifs
-4. **Vérifications fréquentes** : Tester après chaque modification
-5. **Utiliser le tableau CIDR** : Référence rapide pour les calculs
+1. **Comprendre avant configurer** : Analysez toute la topologie
+2. **Simplicité** : Utilisez des adresses logiques et séquentielles
+3. **Cohérence** : Respectez les conventions d'adressage
+4. **Patience** : Testez chaque étape avant de continuer
 
-### Conseils Pratiques
-- **Même masque = même réseau** : Tous les appareils d'un réseau doivent avoir le même masque
-- **Next Hop** : Dans les tables de routage, c'est l'adresse du prochain routeur
-- **Point-to-point** : Utilisez /30 pour les liaisons entre routeurs
-- **Plages privées** : Respectez 10.x.x.x, 172.16-31.x.x, 192.168.x.x
-
-## 🔧 Outils de Débogage
-
-### Problèmes Fréquents
-- **Pas de connectivité** → Vérifier les adresses et masques
-- **Routage impossible** → Contrôler les tables de routage
-- **Conflits d'adresses** → Revoir l'attribution des IP
-
-### Solutions Types
-1. Recalculer les plages de sous-réseaux
-2. Vérifier la cohérence des masques
-3. S'assurer que les routes couvrent tous les réseaux
+### Outils Mentaux
+- **Tableau CIDR** : Mémorisez les masques courants
+- **Calcul d'incrément** : 256 - dernier octet du masque
+- **Règle du même réseau** : Même masque = communication directe possible
+- **Route par défaut** : 0.0.0.0/0 ou "default"
 
 ---
 
-**💡 Conseil Final :** NetPractice est un exercice de logique réseau. Prenez le temps de comprendre chaque concept avant de passer au suivant. La maîtrise des bases vous permettra de résoudre efficacement tous les niveaux.
+## 🎮 Solutions des Niveaux
+
+### Niveau 1 - Configuration Basique
+**Objectif :** Configurer deux réseaux simples
+```json
+{
+  "A1": {"ip": "104.99.23.11"},
+  "D1": {"ip": "211.191.115.76"}
+}
+```
+**Explication :** Deux réseaux séparés avec masques /24 et /16. Assigner des IPs dans les plages valides.
+
+### Niveau 2 - Masques Variables
+**Objectif :** Configurer des masques de sous-réseau
+```json
+{
+  "A1": {"ip": "192.168.57.221"},
+  "B1": {"mask": "255.255.255.224"},
+  "C1": {"ip": "192.168.57.254"},
+  "D1": {"ip": "192.168.57.253"}
+}
+```
+**Explication :** Utilisation de /27 pour créer des sous-réseaux plus petits.
+
+### Niveau 3 - Switch
+**Objectif :** Configuration avec switch
+```json
+{
+  "A1": {"mask": "255.255.255.128"},
+  "B1": {"ip": "104.198.187.124", "mask": "255.255.255.128"},
+  "C1": {"ip": "104.198.187.123"}
+}
+```
+**Explication :** Trois appareils connectés via switch avec masque /25.
+
+### Niveau 4 - Routeur Simple
+**Objectif :** Premier routeur
+```json
+{
+  "A1": {"mask": "255.255.255.240"},
+  "B1": {"ip": "67.52.110.133", "mask": "255.255.255.240"},
+  "R1": {"ip": "67.52.110.134", "mask": "255.255.255.240"}
+}
+```
+**Explication :** Configuration d'un routeur avec masque /28.
+
+### Niveau 5 - Tables de Routage
+**Objectif :** Première table de routage
+```json
+{
+  "routes": {
+    "Ar1": {"route": "default", "gate": "80.103.79.126"},
+    "Br1": {"gate": "163.243.53.254"}
+  },
+  "ifs": {
+    "A1": {"ip": "80.103.79.125", "mask": "255.255.255.128"},
+    "B1": {"ip": "163.243.53.253", "mask": "255.255.192.0"}
+  }
+}
+```
+**Explication :** Introduction des routes par défaut.
+
+### Niveau 6 - Internet
+**Objectif :** Connexion Internet
+```json
+{
+  "routes": {
+    "Ar1": {"route": "0.0.0.0/0", "gate": "29.65.6.226"},
+    "Ir1": {"route": "29.65.6.128/25"}
+  },
+  "ifs": {
+    "A1": {"mask": "255.255.255.128"},
+    "R1": {"ip": "29.65.6.226"}
+  }
+}
+```
+**Explication :** Routage vers Internet avec routes spécifiques.
+
+### Niveau 7 - Topologie Complexe
+**Objectif :** Plusieurs routeurs
+```json
+{
+  "routes": {
+    "Ar1": {"route": "0.0.0.0/0", "gate": "100.198.14.1"},
+    "Cr1": {"route": "0.0.0.0/0", "gate": "100.198.14.18"}
+  },
+  "ifs": {
+    "A1": {"ip": "100.198.14.2", "mask": "255.255.255.240"},
+    "C1": {"ip": "100.198.14.17", "mask": "255.255.255.240"}
+  }
+}
+```
+**Explication :** Réseau avec deux routeurs interconnectés.
+
+### Niveau 8 - Routage Avancé
+**Objectif :** Routes spécifiques
+```json
+{
+  "routes": {
+    "R1r2": {"route": "141.195.172.0/27", "gate": "141.195.172.61"}
+  },
+  "ifs": {
+    "C1": {"ip": "141.195.172.18", "mask": "255.255.255.252"},
+    "R21": {"ip": "141.195.172.61", "mask": "255.255.255.252"}
+  }
+}
+```
+**Explication :** Utilisation de /30 pour liaisons point-à-point.
+
+### Niveau 9 - Réseau Complexe
+**Objectif :** Multiples sous-réseaux
+```json
+{
+  "routes": {
+    "R1r1": {"route": "9.0.0.252/30", "gate": "41.243.18.253"},
+    "R1r2": {"route": "63.239.64.0/18", "gate": "41.243.18.253"}
+  },
+  "ifs": {
+    "A1": {"ip": "121.198.129.2", "mask": "255.255.255.128"},
+    "D1": {"ip": "63.239.100.38", "mask": "/18"}
+  }
+}
+```
+**Explication :** Gestion de plusieurs réseaux avec routage complexe.
+
+### Niveau 10 - Défi Final
+**Objectif :** Configuration complète
+```json
+{
+  "routes": {
+    "R1r1": {"route": "150.152.40.192/30"},
+    "Ir1": {"route": "150.152.40.0/24"}
+  },
+  "ifs": {
+    "H21": {"ip": "150.152.40.3", "mask": "255.255.255.128"},
+    "H31": {"ip": "150.152.40.194", "mask": "255.255.255.252"}
+  }
+}
+```
+**Explication :** Synthèse de tous les concepts appris.
+
+## 📖 Ressources Complémentaires
+
+- [Vidéo explicative recommandée](https://youtu.be/HQUw0CfQWAM)
+- [Calculateur de sous-réseaux en ligne](https://www.subnet-calculator.com/)
+- [RFC 791 - Internet Protocol](https://tools.ietf.org/html/rfc791)
+
+---
 
 > [!TIP]
-> Si ce contenu vous a été utile... \
-> N'hésitez pas à laisser une ⭐️ étoile sur ce repo pour me soutenir !
+> **Conseil final** : NetPractice est un exercice de logique réseau. Maîtrisez les bases (IP, masques, routage) et appliquez une méthode systématique. La pratique régulière est la clé du succès !
+
+> [!NOTE]
+> Si ce guide vous a été utile \
+> n'hésitez pas à laisser une ⭐️ pour soutenir le projet !
